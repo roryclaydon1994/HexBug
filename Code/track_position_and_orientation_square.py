@@ -91,7 +91,7 @@ Nframe = 1
 numb = 4
 
 # General algorithm parameters
-r = 50            # Radius of detected circles (in pixels)
+r = 65            # Radius of detected circles (in pixels)
 minDist = 95      # Minimum distance accepted between two detected circles
 param1 = 27       # Parameter 1 for hough transform
 param2 = 32       # Parameter 2 for hough transform
@@ -109,13 +109,13 @@ def getFiles(dname):
 
 # Subsidiary functions
 def printCircle(x0,y0,r):
-    theta = np.linspace(0,2*pi,50)
+    theta = np.linspace(0,2*np.pi,50)
     x = r*np.cos(theta) + x0
     y = r*np.sin(theta) + y0
     plt.plot(x,y,'k-', linewidth=0.5)
 
 def printDashedCircle(x0,y0,r):
-    theta = np.linspace(0,2*pi,50)
+    theta = np.linspace(0,2*np.pi,50)
     x = r*np.cos(theta) + x0
     y = r*np.sin(theta) + y0
     plt.plot(x,y,'k--', linewidth=2.0)
@@ -140,7 +140,7 @@ def sortByClosest(X_, Y_, X, Y):
     for i in range(len(X)):
         dist = []
         for j in range(len(X_)):
-            dist.append(sqrt((X[i] - X_[j])**2 + (Y[i] - Y_[j])**2))
+            dist.append(np.sqrt((X[i] - X_[j])**2 + (Y[i] - Y_[j])**2))
         order.append(dist.index(np.min(dist)))
     return order
 
@@ -171,8 +171,8 @@ def tic():
 
 def GraysCut(image, ref):
     img_return = (image>ref)*ref + (image<=ref)*image
-    img_return = np.array(img_return, dtype=uint8)
-    return(img_return)
+    img_return = np.array(img_return, dtype=np.uint8)
+    return img_return
 
 def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
     """Detect circles via Hough transform"""
@@ -213,7 +213,7 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             # Exclude what is not in the detected circle
             for m in range(2*r):
                 for n in range(2*r):
-                    if sqrt((m-r)**2 + (n-r)**2) > r:
+                    if np.sqrt((m-r)**2 + (n-r)**2) > r:
                         bug_[m,n] = 255
 
             # Thresholding
@@ -225,7 +225,7 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             # Clean the edges of the annulus
             for m in range(2*r):
                 for n in range(2*r):
-                    if sqrt((m-r)**2 + (n-r)**2) > r-delta:
+                    if np.sqrt((m-r)**2 + (n-r)**2) > r-delta:
                         bugBin_[m,n] = 0
             insideAnnulus[i] = bug_
             insideAnnulus_Bin[i] = bugBin_
@@ -241,7 +241,7 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
                 mu20 = m20/m00 - (m10/m00)**2
                 mu02 = m02/m00 - (m01/m00)**2
                 mu11 = m11/m00 - (m01*m10)/(m00**2)
-                theta = 0.5*arctan2(2*mu11,(mu20-mu02))
+                theta = 0.5*np.arctan2(2*mu11,(mu20-mu02))
                 N.append(theta)
             else:
                 N.append(float('nan'))
@@ -250,7 +250,7 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             fig = plt.figure(figsize=(2,2))
             ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
             x_tmp = np.linspace(0,2*r,10)
-            y_tmp = x_tmp*tan(theta-np.pi/2) + 2*r - m10/m00 - m01*tan(theta-np.pi/2)/m00
+            y_tmp = x_tmp*np.tan(theta-np.pi/2) + 2*r - m10/m00 - m01*np.tan(theta-np.pi/2)/m00
             ax.imshow(bugBin_[::-1,:],cmap='binary')
             ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
             ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
@@ -280,14 +280,13 @@ if __name__=="__main__":
     Yt = {}
     Nt = {}
     ref = 120
-    for im in range(Nframe):
-        print('--'+str(im)+'--')
-        path = 'img/'+name(im)
-        image = cv2.imread(path)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        gray = GraysCut(gray, ref)
-        X_, Y_, N_ = detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_)
-        try_P = 1
+    for file in files:
+        print(f'--{file}--')
+        image=cv2.imread(file)
+        gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        gray=GraysCut(gray, ref)
+        X_,Y_,N_=detect_SI(gray,r,minDist,param1,param2,delta,gaussianFilterParam_)
+        try_P=1
         quit()
 
         while len(X_) > numb and try_P < 20: # Modify treshold to find the right number of annulus
@@ -312,11 +311,11 @@ if __name__=="__main__":
             Y = [Y_[i] for i in order]
             N = [N_[i] for i in order]
             for i in range(len(N)):
-                if abs(N[i]-Nt[im-1][i])>(pi/2) and abs(N[i]-Nt[im-1][i])<(3*pi/2):
-                    if (N[i] - Nt[im-1][i])%(2*pi) > 0:
-                        N[i] = (N[i] - pi)%(2*pi)
+                if abs(N[i]-Nt[im-1][i])>(pi/2) and abs(N[i]-Nt[im-1][i])<(3*np.pi/2):
+                    if (N[i] - Nt[im-1][i])%(2*np.pi) > 0:
+                        N[i] = (N[i] - pi)%(2*np.pi)
                     else:
-                        N[i] = (N[i] + pi)%(2*pi)
+                        N[i] = (N[i] + pi)%(2*np.pi)
         i_invert = np.argmin(Y)
         N[i_invert] = N[i_invert] + np.pi
         Xt[im] = X
