@@ -81,7 +81,10 @@ import time
 import csv
 import sys
 import argparse
+import os
 from glob import glob
+from pprint import pprint
+import re
 
 """
     Set globals
@@ -104,7 +107,8 @@ gaussianFilterParam_ = 5 # Gaussian filter size before contour detection (must b
 # Get files here
 def getFiles(dname):
     print(f"Loading from Images/{dname}")
-    files=glob(f"../Images/{dname}/*")
+    files=glob(f"../Images/{dname}/img*.png")
+    files=sorted(files,key=lambda f: int(re.findall('\d+',os.path.split(f)[-1])[0]))
     return files
 
 # Subsidiary functions
@@ -207,7 +211,7 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             ax.set_xlim([0,2*r])
             ax.set_ylim([0,2*r])
             ax.axis('off')
-            plt.savefig('insideAnnulus'+str(i)+'.png', dpi=300)
+            plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus{i}.png',dpi=300)
             plt.close(fig)
 
             # Exclude what is not in the detected circle
@@ -259,11 +263,25 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             ax.set_xlim([0,2*r])
             ax.set_ylim([0,2*r])
             ax.axis('off')
-            plt.savefig('insideAnnulus_Bin'+str(i)+'.png', dpi=300)
+            plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus_Bin{i}.png',dpi=300)
+            plt.close(fig)
+
+            fig = plt.figure(figsize=(2,2))
+            ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
+            ax.imshow(bug_[::-1,:],cmap='gray')
+            ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
+            ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
+            printDashedCircle(r, r, r-delta)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_xlim([0,2*r])
+            ax.set_ylim([0,2*r])
+            ax.axis('off')
+            plt.savefig(f'../Images/Checks/{args.exp_name}/{i}_bug_in_circle.png',dpi=300)
             plt.close(fig)
     else:
         print("No circles")
-    return(X, Y, N)
+    return X,Y,N
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Image processing code')
@@ -271,6 +289,12 @@ if __name__=="__main__":
                         help='name of the experiment label')
     args = parser.parse_args()
     files=getFiles(args.exp_name)
+
+    # Set up Output directories
+    os.makedirs(f"../Data/{args.exp_name}/img_processed",exist_ok=True)
+    os.makedirs(f"../Images/Check/{args.exp_name}",exist_ok=True)
+
+
 
     ###############################################################################
     TicToc = TicTocGenerator() # create an instance of the TicTocGen generator
@@ -280,14 +304,13 @@ if __name__=="__main__":
     Yt = {}
     Nt = {}
     ref = 120
-    for file in files:
+    for im,file in enumerate(files):
         print(f'--{file}--')
         image=cv2.imread(file)
         gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         gray=GraysCut(gray, ref)
         X_,Y_,N_=detect_SI(gray,r,minDist,param1,param2,delta,gaussianFilterParam_)
         try_P=1
-        quit()
 
         while len(X_) > numb and try_P < 20: # Modify treshold to find the right number of annulus
             param2 = param2 + 1
@@ -311,11 +334,11 @@ if __name__=="__main__":
             Y = [Y_[i] for i in order]
             N = [N_[i] for i in order]
             for i in range(len(N)):
-                if abs(N[i]-Nt[im-1][i])>(pi/2) and abs(N[i]-Nt[im-1][i])<(3*np.pi/2):
+                if abs(N[i]-Nt[im-1][i])>(np.pi/2) and abs(N[i]-Nt[im-1][i])<(3*np.pi/2):
                     if (N[i] - Nt[im-1][i])%(2*np.pi) > 0:
-                        N[i] = (N[i] - pi)%(2*np.pi)
+                        N[i] = (N[i] - np.pi)%(2*np.pi)
                     else:
-                        N[i] = (N[i] + pi)%(2*np.pi)
+                        N[i] = (N[i] + np.pi)%(2*np.pi)
         i_invert = np.argmin(Y)
         N[i_invert] = N[i_invert] + np.pi
         Xt[im] = X
@@ -329,9 +352,10 @@ if __name__=="__main__":
         plt.yticks([])
         for i in range(len(N_)):
             printCircle(X[i], Y[i], r)
-            plt.quiver(X[i], Y[i], -sin(N[i]), cos(N[i]), pivot='mid', zorder=1, scale=15, color='red', headwidth=3.0)
-
-        plt.savefig('img_processed/'+name(im), dpi=300)
+            plt.quiver(X[i], Y[i], -np.sin(N[i]), np.cos(N[i]),
+                       pivot='mid', zorder=1, scale=15,
+                       color='red', headwidth=3.0)
+        plt.savefig(f'../Data/{args.exp_name}/img_processed/{name(im)}', dpi=300)
         plt.close(fig)
     toc()
     # Write the CSV
