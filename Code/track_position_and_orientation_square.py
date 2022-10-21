@@ -370,13 +370,17 @@ if __name__=="__main__":
     # Save the file of neighbors
     fname = f"../Data/{args.exp_name}/data.csv"
     Xs=np.array(Xs)
-    np.savetxt( f"../Data/{args.exp_name}/Xs.txt",Xs)
+    np.savetxt(f"../Data/{args.exp_name}/Xs.txt",Xs)
 
     Ys=np.array(Ys)
-    np.savetxt( f"../Data/{args.exp_name}/Ys.txt",Ys)
+    np.savetxt(f"../Data/{args.exp_name}/Ys.txt",Ys)
 
     Ns=np.array(Ns)
-    np.savetxt( f"../Data/{args.exp_name}/Ns.txt",Ns)
+    np.savetxt(f"../Data/{args.exp_name}/Ns.txt",Ns)
+
+
+    tmnp_Xs=np.loadtxt(f"../Data/{args.exp_name}/Xs.txt")
+    print(f"{tmnp_Xs.shape=}")
     # file = open(fname, "w")
     # try:
     #     writer = csv.writer(file, delimiter=",")
