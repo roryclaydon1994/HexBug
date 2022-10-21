@@ -131,3 +131,4 @@ dmypy.json
 # Ignore images and movies
 Movies/*
 Images/*
+Data/*
