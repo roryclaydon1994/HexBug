@@ -8,9 +8,9 @@ import shlex
 for ff in glob("../Movies/*"):
     dd,ext=os.path.split(ff)
     mv_nm=glob(f"{ff}/*mp4")[0]
-    if os.path.exists(f"Images/{ext}"):
+    if os.path.exists(f"../Images/{ext}"):
         continue
-    os.makedirs(f"Images/{ext}")
+    os.makedirs(f"../Images/{ext}")
     proc=f"ffmpeg -i {mv_nm} -r 30 ../Images/{ext}/img-%04d.png"
     print(shlex.split(proc))
     subprocess.run(shlex.split(proc))

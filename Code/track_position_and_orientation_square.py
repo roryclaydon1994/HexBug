@@ -202,17 +202,17 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
             Y.append(y)
             bug_ = np.copy(gray[y-r:y+r, x-r:x+r])
             # Pedagogical Output
-            fig = plt.figure(figsize=(2,2))
-            ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
-            ax.imshow(bug_[::-1,:],cmap='gray')
-            printDashedCircle(r, r, r-delta)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xlim([0,2*r])
-            ax.set_ylim([0,2*r])
-            ax.axis('off')
-            plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus{i}.png',dpi=300)
-            plt.close(fig)
+            # fig = plt.figure(figsize=(2,2))
+            # ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
+            # ax.imshow(bug_[::-1,:],cmap='gray')
+            # printDashedCircle(r, r, r-delta)
+            # ax.set_xticks([])
+            # ax.set_yticks([])
+            # ax.set_xlim([0,2*r])
+            # ax.set_ylim([0,2*r])
+            # ax.axis('off')
+            # plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus{i}.png',dpi=300)
+            # plt.close(fig)
 
             # Exclude what is not in the detected circle
             for m in range(2*r):
@@ -251,34 +251,34 @@ def detect_SI(gray, r, minDist, param1, param2, delta, gaussianFilterParam_):
                 N.append(float('nan'))
 
             # Pedagogical Output
-            fig = plt.figure(figsize=(2,2))
-            ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
-            x_tmp = np.linspace(0,2*r,10)
-            y_tmp = x_tmp*np.tan(theta-np.pi/2) + 2*r - m10/m00 - m01*np.tan(theta-np.pi/2)/m00
-            ax.imshow(bugBin_[::-1,:],cmap='binary')
-            ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
-            ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xlim([0,2*r])
-            ax.set_ylim([0,2*r])
-            ax.axis('off')
-            plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus_Bin{i}.png',dpi=300)
-            plt.close(fig)
-
-            fig = plt.figure(figsize=(2,2))
-            ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
-            ax.imshow(bug_[::-1,:],cmap='gray')
-            ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
-            ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
-            printDashedCircle(r, r, r-delta)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xlim([0,2*r])
-            ax.set_ylim([0,2*r])
-            ax.axis('off')
-            plt.savefig(f'../Images/Checks/{args.exp_name}/{i}_bug_in_circle.png',dpi=300)
-            plt.close(fig)
+            # fig = plt.figure(figsize=(2,2))
+            # ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
+            # x_tmp = np.linspace(0,2*r,10)
+            # y_tmp = x_tmp*np.tan(theta-np.pi/2) + 2*r - m10/m00 - m01*np.tan(theta-np.pi/2)/m00
+            # ax.imshow(bugBin_[::-1,:],cmap='binary')
+            # ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
+            # ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
+            # ax.set_xticks([])
+            # ax.set_yticks([])
+            # ax.set_xlim([0,2*r])
+            # ax.set_ylim([0,2*r])
+            # ax.axis('off')
+            # plt.savefig(f'../Images/Checks/{args.exp_name}/insideAnnulus_Bin{i}.png',dpi=300)
+            # plt.close(fig)
+            #
+            # fig = plt.figure(figsize=(2,2))
+            # ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
+            # ax.imshow(bug_[::-1,:],cmap='gray')
+            # ax.plot([m01/m00], [2*r-m10/m00], 'ro', markersize=9.0)
+            # ax.plot(x_tmp, y_tmp, 'r-', linewidth=4.0)
+            # printDashedCircle(r, r, r-delta)
+            # ax.set_xticks([])
+            # ax.set_yticks([])
+            # ax.set_xlim([0,2*r])
+            # ax.set_ylim([0,2*r])
+            # ax.axis('off')
+            # plt.savefig(f'../Images/Checks/{args.exp_name}/{i}_bug_in_circle.png',dpi=300)
+            # plt.close(fig)
     else:
         print("No circles")
     return X,Y,N
@@ -292,7 +292,7 @@ if __name__=="__main__":
 
     # Set up Output directories
     os.makedirs(f"../Data/{args.exp_name}/img_processed",exist_ok=True)
-    os.makedirs(f"../Images/Check/{args.exp_name}",exist_ok=True)
+    os.makedirs(f"../Images/Checks/{args.exp_name}",exist_ok=True)
 
 
 
@@ -300,10 +300,14 @@ if __name__=="__main__":
     TicToc = TicTocGenerator() # create an instance of the TicTocGen generator
     tic()
     # Load the images
+    Xs=[]
+    Ys=[]
+    Ns=[]
     Xt = {}
     Yt = {}
     Nt = {}
     ref = 120
+    print(f"{len(files)=}")
     for im,file in enumerate(files):
         print(f'--{file}--')
         image=cv2.imread(file)
@@ -344,29 +348,41 @@ if __name__=="__main__":
         Xt[im] = X
         Yt[im] = Y
         Nt[im] = N
+        Xs.append(X)
+        Ys.append(Y)
+        Ns.append(N)
         # Outputs
 
-        fig = plt.figure()
-        plt.imshow(image)
-        plt.xticks([])
-        plt.yticks([])
-        for i in range(len(N_)):
-            printCircle(X[i], Y[i], r)
-            plt.quiver(X[i], Y[i], -np.sin(N[i]), np.cos(N[i]),
-                       pivot='mid', zorder=1, scale=15,
-                       color='red', headwidth=3.0)
-        plt.savefig(f'../Data/{args.exp_name}/img_processed/{name(im)}', dpi=300)
-        plt.close(fig)
+        # fig = plt.figure()
+        # plt.imshow(image)
+        # plt.xticks([])
+        # plt.yticks([])
+        # for i in range(len(N_)):
+        #     printCircle(X[i], Y[i], r)
+        #     plt.quiver(X[i], Y[i], -np.sin(N[i]), np.cos(N[i]),
+        #                pivot='mid', zorder=1, scale=15,
+        #                color='red', headwidth=3.0)
+        # plt.savefig(f'../Data/{args.exp_name}/img_processed/{name(im)}', dpi=300)
+        # plt.close(fig)
     toc()
+
     # Write the CSV
     # Save the file of neighbors
-    fname = "data.csv"
-    file = open(fname, "w")
-    try:
-        writer = csv.writer(file, delimiter=",")
-        for i in range(Nframe):
-            writer.writerow(Xt[i])
-            writer.writerow(Yt[i])
-            writer.writerow(Nt[i])
-    finally:
-        file.close()
+    fname = f"../Data/{args.exp_name}/data.csv"
+    Xs=np.array(Xs)
+    np.savetxt( f"../Data/{args.exp_name}/Xs.txt",Xs)
+
+    Ys=np.array(Ys)
+    np.savetxt( f"../Data/{args.exp_name}/Ys.txt",Ys)
+
+    Ns=np.array(Ns)
+    np.savetxt( f"../Data/{args.exp_name}/Ns.txt",Ns)
+    # file = open(fname, "w")
+    # try:
+    #     writer = csv.writer(file, delimiter=",")
+    #     for i in range(Nframe):
+    #         writer.writerow(Xt[i])
+    #         writer.writerow(Yt[i])
+    #         writer.writerow(Nt[i])
+    # except Exception as e:
+    #     file.close()
